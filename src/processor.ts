@@ -11,8 +11,10 @@ const processor = new SubstrateEvmProcessor("erc721");
 
 processor.setDataSource({
   chain: CHAIN_NODE,
-  archive: lookupArchive("moonbeam")[0].url,
+  archive: lookupArchive("moonriver")[0].url,
 });
+
+processor.setBatchSize(500);
 
 processor.addPreHook({ range: { from: 0, to: 0 } }, async (ctx) => {
   await ctx.store.save(createContractEntity());
