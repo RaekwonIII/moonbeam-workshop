@@ -28,6 +28,8 @@ processor.addEvmLogHandler(
   processTransfer
 );
 
+processor.run();
+
 async function processTransfer(ctx: EvmLogHandlerContext): Promise<void> {
   const transfer =
     events["Transfer(address,address,uint256)"].decode(ctx);
