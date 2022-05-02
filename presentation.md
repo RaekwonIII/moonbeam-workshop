@@ -4,7 +4,6 @@ tags: EMV, Subsquid, Polkadot, Dotsama, Indexing, Moonbeam, Workshop
 description: View the slide with "Slide Mode".
 slideOptions:
   center: false
-  theme: solarized
   transition: fade
   spotlight:
     enabled: false
@@ -22,6 +21,11 @@ slideOptions:
         width: 100%;
     }
 </style>
+
+<!-- .slide: data-background="https://i.imgur.com/Z4Jt5vh.png" -->
+<!-- .slide: data-background="image.png"-->
+
+
 
 ![](https://i.imgur.com/Z4Jt5vh.png)
 
@@ -44,205 +48,694 @@ https://tinyurl.com/subsquid-moonbeam
 ---
 
   
-## Blockchain data problems (1)
+## Blockchain data problems
 
 ![](https://i.imgur.com/2YUZ2RP.jpg =400x400)
 
 Projects need custom data analysis for informed decision making
 
-----
-
-## Blockchain data problems (2)
-
-* Very limited Rust-based chain analysis
-  * Unreadable data, need cleaning up
-* No complex logic with basic RPC calls
-* Many middlewares only help **accessing** data
-  * Weak support for complex business logic
-
 ---
 
-## Subsquid’s Architecture (1)
+## Monolith vs modular (1)
 
-![](https://i.imgur.com/KpaJ26Z.png)
+![](https://i.imgur.com/3sIMFS5.png)
 
 ----
 
-## Subsquid’s Architecture (2)
+## Monolith vs modular (2)
 
-* Archives index blockchain data
-* Define custom business logic in Squids
-* Tokenomics guarantee decentralization
-  * Robustness, resilience, incorruptibility
-
-Note:
+* Offload heavy lifting to Archives
+* Faster development with available historical data
 * Faster than RPC calls
+
+Note:
+
+* Lower storage requirements, less computing power
+* Acts like a "blockchain cache"
 * No sync wait times
+* Bonus: can use Archives and Processors like LEGOs
 
 ---
 
-## Subsquid, the most flexible API SDK
+# Permissive SDK
 
-* Unified Substrate and EVM indexing
-* Easy setup, local development
-* Fast sync times
-* Built-in GraphQL server
-
-*Build and deploy production-ready APIs within *hours**
+## Unified Substrate and EVM indexing
 
 Note:
-* Can track both Substrate Events/Extrinsics AND Evm data in the same API
-* It's much easier to test, break things, start, stop the server
-* Fast sync times, because the raw indexing is done by Archives
+
+Can track both Substrate Events/Extrinsics AND Evm data in the same API
 
 ----
 
-## Full control of your API
+# Permissive SDK
 
-* Define database schema
-* Add external libs to project
-  * Call Coingecko API to fetch prices? ✅
-* Extensions via custom resolvers
+## Full control of database schema
+
+----
+
+# Permissive SDK
+
+## External libs/APIs in your project
+
+E.g. fetch prices from Coikgecko? ✅
+
+----
+
+# Permissive SDK
+
+## Extensions via custom resolvers
 
 ---
 
-## How: built for devs, by devs
+# Built for devs
 
-* Automated tools for scaffolding
-* Type-safety of TypeScript
-* Robustness against Runtime upgrades
-* Serverless deployment
-
-*As simple as possible, as complex as you can*
+## Easy setup, local development
 
 Note:
-- Generate models from GraphQL schema
-- Generate interfaces for Substrate entities
-- TypeScript was born to reduce bugs and help isolate 
-- Generated interfaces track Runtime changes
+
+It's much easier to test, break things, start, stop the server
+
+----
+
+# Built for devs
+
+## Fast sync times
+
+Note:
+
+Fast sync times, because the raw indexing is done by Archives
+Build and deploy production-ready APIs within *hours*
+
+----
+
+# Built for devs
+
+## Serverless deployment
 
 ---
 
-## Automate, automate everything…
+# Built for devs
 
 ![](https://i.imgur.com/diDqPWP.jpg)
 
----
+Note:
 
-## Codegen
-
-#### TypeScript models of schema entities
-
-#### (ORM abstraction layer)
-
-1. Customize schema
-2. Launch `sqd codegen` command
-3. Generate TypeScript classes, representing Entities
+* Generate as much boilerplate possible
+* Type-safety of TypeScript
+* Focus on business logic
+* No manual JSON parsing
+* No manual chasing of Runtime upgrades
 
 ---
 
-## Typegen (Substrate)
+# Codegen
 
-<!-- #### Type-safe wrappers for Events/Extrinsics/Storage items -->
+## From schema
 
-#### 👋Runtime upgrade bugs
-
-1. Launch `squid-substrate-metadata-explorer` to scan blockchain metadata
-2. Edit the `typegen.json` config file
-3. Launch `squid-substrate-typegen` command to generate TypeScript interfaces
-  * "Aware" of Runtime version changes
-
-----
-
-## Typegen (EVM)
-
-1. Download the ERC*** ABI in JSON format
-2. Launch `squid-evm-typegen`
-3. Generate TypeScript interfaces and methods to decode EVM calls
-
----
-
-## Get coding!
-
-#### Define functions to handle Events/Extrinsics/Storage Items
-
-* Functions must accept a `Context` argument
-* Use `Context` to decode Events
-* `Context` has access to `Store` class for saving on the database
-* Custom business logic
-
-*As simple as you want, as complex as you can*
-
-----
-
-<!-- .slide: class="smol" -->
-
-## Function anatomy
-
-Example from the squid-template project
-
-```typescript [1|3|4|5|6|13|]
-processor.addEventHandler("balances.Transfer", processTransfer);
-
-async function processTransfer (ctx: EventHandlerContext): Promise<void> {
-  const transfer = getTransferEvent(ctx);
-  const tip = ctx.extrinsic?.tip || 0n;
-  const from = ss58.codec("kusama").encode(transfer.from);
-  const to = ss58.codec("kusama").encode(transfer.to);
-
-  const fromAcc = await getOrCreate(ctx.store, Account, from);
-  fromAcc.balance = fromAcc.balance || 0n;
-  fromAcc.balance -= transfer.amount;
-  fromAcc.balance -= tip;
-  await ctx.store.save(fromAcc);
-
-  const toAcc = await getOrCreate(ctx.store, Account, to);
-  toAcc.balance = toAcc.balance || 0n;
-  toAcc.balance += transfer.amount;
-  await ctx.store.save(toAcc);
-
-  await ctx.store.save(
-    new HistoricalBalance({
-      id: `${ctx.event.id}-to`,
-      account: fromAcc,
-      balance: fromAcc.balance,
-      date: new Date(ctx.block.timestamp),
-    })
-  );
-
-  await ctx.store.save(
-    new HistoricalBalance({
-      id: `${ctx.event.id}-from`,
-      account: toAcc,
-      balance: toAcc.balance,
-      date: new Date(ctx.block.timestamp),
-    })
-  );
+```graphql=
+type Owner @entity {
+  id: ID!
+  ownedTokens: [Token!]! @derivedFrom(field: "owner")
+  balance: BigInt
 }
 ```
 
+----
+
+# Codegen
+
+## To Models
+
+```typescript=
+@Entity_()
+export class Owner {
+  constructor(props?: Partial<Owner>) {
+    Object.assign(this, props)
+  }
+
+  @PrimaryColumn_()
+  id!: string
+
+  @OneToMany_(() => Token, e => e.owner)
+  ownedTokens!: Token[]
+
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+  balance!: bigint | undefined | null
+}
+```
+
+Note:
+
+Easier to define entities as a schema, code is built automatically
+
 ---
 
-## GraphQL endpoint
+# Typegen
 
-#### …with zero additional effort 😉
+## Type-safe wrappers for Substrate
 
-![](https://i.imgur.com/x100opd.png =780x)
+----
+
+## Runtime upgrades
+
+![](https://i.imgur.com/1EPSqM7.png =470x)
+![](https://i.imgur.com/AMm3Wud.png =470x)
+![](https://i.imgur.com/w0LygwF.png =470x)
+
+Note:
+
+Runtime upgrades break things...
+
+----
+
+## 👋Runtime upgrade bugs
+
+```typescript=
+export class BalancesTransferEvent {
+  constructor(private ctx: EventContext) {
+    assert(this.ctx.event.name === 'balances.Transfer')
+  }
+
+  get isV1020(): boolean {
+    return this.ctx._chain.getEventHash('balances.Transfer') === '72e6f0d399a72f77551d560f52df25d757e0643d0192b3bc837cbd91b6f36b27'
+  }
+
+  get asV1020(): [Uint8Array, Uint8Array, bigint, bigint] {
+    assert(this.isV1020)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isV1050(): boolean {
+    return this.ctx._chain.getEventHash('balances.Transfer') === 'dad2bcdca357505fa3c7832085d0db53ce6f902bd9f5b52823ee8791d351872c'
+  }
+
+  get asV1050(): [Uint8Array, Uint8Array, bigint] {
+    assert(this.isV1050)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+
+  get isV9130(): boolean {
+    return this.ctx._chain.getEventHash('balances.Transfer') === '0ffdf35c495114c2d42a8bf6c241483fd5334ca0198662e14480ad040f1e3a66'
+  }
+
+  get asV9130(): {from: v9130.AccountId32, to: v9130.AccountId32, amount: bigint} {
+    assert(this.isV9130)
+    return this.ctx._chain.decodeEvent(this.ctx.event)
+  }
+}
+```
+
+Note:
+
+* Keep track of Runtime changes
+* No manual procedure
+* Reduce bugs
+
+---
+
+# EVM Typegen
+
+## ABI automated parsing
+
+----
+
+## ABI automated parsing
+
+### From JSON...
+
+```json=
+[
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "symbol",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "baseURI",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "approved",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Approval",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "ApprovalForAll",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "Transfer",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "baseURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getApproved",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "isApprovedForAll",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ownerOf",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "_data",
+          "type": "bytes"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "setApprovalForAll",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenByIndex",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenOfOwnerByIndex",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "tokenURI",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]
+```
+
+----
+
+## ABI automated parsing
+
+### ...to TypeScript
+
+```typescript=
+export interface TransferAddressAddressUint256Event {
+  from: string;
+  to: string;
+  tokenId: ethers.BigNumber;
+}
+
+export const events = {
+  // ...
+  "Transfer(address,address,uint256)":  {
+    topic: abi.getEventTopic("Transfer(address,address,uint256)"),
+    decode(data: EvmEvent): TransferAddressAddressUint256Event {
+      const result = abi.decodeEventLog(
+        abi.getEvent("Transfer(address,address,uint256)"),
+        data.data || "",
+        data.topics
+      );
+      return  {
+        from: result[0],
+        to: result[1],
+        tokenId: result[2],
+      }
+    }
+  },
+}
+```
+
+Note:
+
+* No manual JSON parsing
+* Pass data through interfaces
 
 ---
 
 ## Resources
 
-* Docs: https://docs.subsquid.io
-* Moonbeam docs:
-  https://docs.moonbeam.network/builders/integrations/indexers/subsquid/
-* Template project:
-  https://github.com/subsquid/squid-template
-* Aquarium
-  https://app.subsquid.io/aquarium
-* Stackexchange (subsquid tag):
-  https://substrate.stackexchange.com/
-* Tech community: [SquidDevs Telegram](https://t.me/HydraDevs) group, [Discord](https://discord.gg/dxR4wNgdjV) server 
+* [Subsquid Docs](https://docs.subsquid.io)
+* [Moonbeam docs](https://docs.moonbeam.network/builders/integrations/indexers/subsquid/)
+* [Template project](https://github.com/subsquid/squid-template)
+* [Aquarium](https://app.subsquid.io/aquarium)
+* [Stackexchange](https://substrate.stackexchange.com/) (subsquid tag):
+* Community: [Telegram](https://t.me/HydraDevs) group, [Discord](https://discord.gg/dxR4wNgdjV) server 
 
 ---
 
@@ -691,130 +1184,6 @@ https://github.com/subsquid/squid
 
 Give us a ⭐, would you?
 
-<!-- 
-
-## Typegen (metadata explore)
-
-If we set up the `Makefile`, in a console window, from the project root, launch:
-
-```bash
-make explore
-```
-
-Use the full command otherwise:
-
-```bash
-npx squid-substrate-metadata-explorer \
-		--chain wss://wss.api.moonriver.moonbeam.network \
-		--archive https://moonriver-beta.indexer.gc.subsquid.io/v4/graphql \
-		--out moonbeamVersions.json
-```
-
-[![](https://i.gyazo.com/48fbc8c063f07a7623994144082e4855.gif =450x)](https://gyazo.com/48fbc8c063f07a7623994144082e4855)
-
--->
-
-<!-- 
-## Typegen (`typegen.json`) and command
-
-Edit the `typegen.json` file like so
-
-```json=
-{
-  "outDir": "src/types",
-  "chainVersions": "kusamaVersions.json",
-  "typesBundle": "kusama",
-  "events": [
-    "balances.Transfer"
-  ],
-  "calls": []
-}
-```
-
-And launch
-
-```bash
-make typegen
-```
-
-Or, alternatively
-
-```bash
-npx squid-substrate-typegen typegen.json
-```
- -->
- 
-<!-- 
-## Typegen (proj structure)
-
-![](https://i.imgur.com/p0ayRK0.png) -->
-
-<!-- 
-## Typegen (interfaces)
-
-```typescript=
-export class BalancesTransferEvent {
-  constructor(private ctx: EventContext) {
-    assert(this.ctx.event.name === 'balances.Transfer')
-  }
-
-  /**
-   *  Transfer succeeded (from, to, value, fees).
-   */
-  get isV1020(): boolean {
-    return this.ctx._chain.getEventHash('balances.Transfer') === '72e6f0d399a72f77551d560f52df25d757e0643d0192b3bc837cbd91b6f36b27'
-  }
-
-  /**
-   *  Transfer succeeded (from, to, value, fees).
-   */
-  get asV1020(): [Uint8Array, Uint8Array, bigint, bigint] {
-    assert(this.isV1020)
-    return this.ctx._chain.decodeEvent(this.ctx.event)
-  }
-
-  /**
-   *  Transfer succeeded (from, to, value).
-   */
-  get isV1050(): boolean {
-    return this.ctx._chain.getEventHash('balances.Transfer') === 'dad2bcdca357505fa3c7832085d0db53ce6f902bd9f5b52823ee8791d351872c'
-  }
-
-  /**
-   *  Transfer succeeded (from, to, value).
-   */
-  get asV1050(): [Uint8Array, Uint8Array, bigint] {
-    assert(this.isV1050)
-    return this.ctx._chain.decodeEvent(this.ctx.event)
-  }
-
-  /**
-   * Transfer succeeded.
-   */
-  get isV9130(): boolean {
-    return this.ctx._chain.getEventHash('balances.Transfer') === '0ffdf35c495114c2d42a8bf6c241483fd5334ca0198662e14480ad040f1e3a66'
-  }
-
-  /**
-   * Transfer succeeded.
-   */
-  get asV9130(): {from: v9130.AccountId32, to: v9130.AccountId32, amount: bigint} {
-    assert(this.isV9130)
-    return this.ctx._chain.decodeEvent(this.ctx.event)
-  }
-
-  get isLatest(): boolean {
-    deprecateLatest()
-    return this.isV9130
-  }
-
-  get asLatest(): {from: v9130.AccountId32, to: v9130.AccountId32, amount: bigint} {
-    deprecateLatest()
-    return this.asV9130
-  }
-}
-``` 
- -->
 <!-- 
 ```graphviz
 digraph {
