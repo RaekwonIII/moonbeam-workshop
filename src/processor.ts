@@ -1,4 +1,3 @@
-import * as ss58 from "@subsquid/ss58";
 import {
   EventHandlerContext,
   EvmLogHandlerContext,
