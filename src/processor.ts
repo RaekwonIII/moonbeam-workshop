@@ -3,12 +3,13 @@ import {
   EvmLogHandlerContext,
   Store,
   SubstrateEvmProcessor,
-  toHex, 
+  toHex
 } from "@subsquid/substrate-evm-processor";
 import { lookupArchive } from "@subsquid/archive-registry";
+import { getAddress } from "@ethersproject/address"
 import { CHAIN_NODE, contract, createContractEntity, getContractEntity } from "./contract";
 import { events } from "./abi/erc721";
-import { Owner, Token, Transfer, Account, HistoricalBalance,} from "./model";
+import { Owner, Token, Transfer, HistoricalBalance,} from "./model";
 import { BalancesTransferEvent } from "./types/events";
 
 const processor = new SubstrateEvmProcessor("erc721");
@@ -29,19 +30,27 @@ processor.addEvmLogHandler(
   {
     filter: [events["Transfer(address,address,uint256)"].topic],
   },
-  processTransfer
+  processErcTransfer
 );
-processor.addEventHandler("balances.Transfer", async (ctx) => {
+
+processor.addEventHandler("balances.Transfer", processTransfer);
+
+processor.run();
+
+async function processTransfer(ctx: EventHandlerContext): Promise<void> {
   const transfer = getTransferEvent(ctx);
   const tip = ctx.extrinsic?.tip || 0n;
 
-  const fromAcc = await getOrCreate(ctx.store, Account, toHex(transfer.from));
+  const from = getAddress(toHex(transfer.from));
+  const to = getAddress(toHex(transfer.to));
+
+  const fromAcc = await getOrCreate(ctx.store, Owner, from);
   fromAcc.balance = fromAcc.balance || 0n;
   fromAcc.balance -= transfer.amount;
   fromAcc.balance -= tip;
   await ctx.store.save(fromAcc);
 
-  const toAcc = await getOrCreate(ctx.store, Account, toHex(transfer.to));
+  const toAcc = await getOrCreate(ctx.store, Owner, to);
   toAcc.balance = toAcc.balance || 0n;
   toAcc.balance += transfer.amount;
   await ctx.store.save(toAcc);
@@ -63,25 +72,21 @@ processor.addEventHandler("balances.Transfer", async (ctx) => {
       date: new Date(ctx.block.timestamp),
     })
   );
-});
+};
 
-processor.run();
-
-async function processTransfer(ctx: EvmLogHandlerContext): Promise<void> {
+async function processErcTransfer(ctx: EvmLogHandlerContext): Promise<void> {
   const transfer =
     events["Transfer(address,address,uint256)"].decode(ctx);
+    
+  console.log("Found ERC transfer", transfer.tokenId.toString());
 
-  let from = await ctx.store.get(Owner, transfer.from);
-  if (from == null) {
-    from = new Owner({ id: transfer.from, balance: 0n });
-    await ctx.store.save(from);
-  }
+  const from = await getOrCreate(ctx.store, Owner, transfer.from);
+  from.balance = from.balance || 0n;
+  await ctx.store.save(from);
 
-  let to = await ctx.store.get(Owner, transfer.to);
-  if (to == null) {
-    to = new Owner({ id: transfer.to, balance: 0n });
-    await ctx.store.save(to);
-  }
+  const to = await getOrCreate(ctx.store, Owner, transfer.to);
+  to.balance = to.balance || 0n;
+  await ctx.store.save(to);
 
   let token = await ctx.store.get(Token, transfer.tokenId.toString());
   if (token == null) {
