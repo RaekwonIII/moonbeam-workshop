@@ -22,17 +22,19 @@ slideOptions:
     }
 </style>
 
-<!-- .slide: data-background="https://i.imgur.com/Z4Jt5vh.png" -->
-<!-- .slide: data-background="image.png"-->
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/cover_bg.png" -->
 
+<!-- ![](https://i.imgur.com/Z4Jt5vh.png) -->
+# Building a unified API
 
+## For indexing EVM and Substrate data with Subsquid
 
-![](https://i.imgur.com/Z4Jt5vh.png)
-
-slides available here
+Slides available here
 https://tinyurl.com/subsquid-moonbeam
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 # Who am I?
 
@@ -41,11 +43,13 @@ https://tinyurl.com/subsquid-moonbeam
 ### Developer Advocate @ Subsquid.io
 
 * ![](https://i.imgur.com/wqhrc3N.png =24x24) [@RaekwonIII](https://twitter.com/RaekwonIII) 
-* ![](https://i.imgur.com/75Cipsr.png =24x24) RaekwonIII#3962 
+* ![](https://i.imgur.com/kH2GXYx.png =24x24) RaekwonIII#3962 
 * ![](https://i.imgur.com/92AwE1H.png =24x24) [@RaekwonTheChefIII](https://t.me/RaekwonTheChefIII) 
-* ![](https://i.imgur.com/mmVZtr0.png =24x24) [RaekwonIII](https://github.com/RaekwonIII) 
+* ![](https://i.imgur.com/MGAfGvC.png =24x24) [RaekwonIII](https://github.com/RaekwonIII) 
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
   
 ## Blockchain data problems
@@ -56,26 +60,61 @@ Projects need custom data analysis for informed decision making
 
 ---
 
-## Monolith vs modular (1)
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
+# Monolith vs modular (1)
+
+![](https://i.imgur.com/PZqYqYs.png)
+
+----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
+# Monolith vs modular (2)
 
 ![](https://i.imgur.com/3sIMFS5.png)
 
 ----
 
-## Monolith vs modular (2)
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
-* Offload heavy lifting to Archives
-* Faster development with available historical data
-* Faster than RPC calls
+# Monolith vs modular (3)
+
+## Offload heavy lifting to Archives
 
 Note:
 
 * Lower storage requirements, less computing power
-* Acts like a "blockchain cache"
-* No sync wait times
+
+----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
+# Monolith vs modular (4)
+
+## Pre-indexed "queryable" historical data
+
+Note:
+
+* API updates => wait for re-sync
+  * Acts like a "blockchain cache"
+
+----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
+# Monolith vs modular (5)
+
+## Faster than RPC calls
+
+Note:
+
+* Can be scaled, does not depend on the DApp
 * Bonus: can use Archives and Processors like LEGOs
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 # Permissive SDK
 
@@ -87,11 +126,15 @@ Can track both Substrate Events/Extrinsics AND Evm data in the same API
 
 ----
 
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
 # Permissive SDK
 
 ## Full control of database schema
 
 ----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 # Permissive SDK
 
@@ -101,11 +144,15 @@ E.g. fetch prices from Coikgecko? ✅
 
 ----
 
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
 # Permissive SDK
 
 ## Extensions via custom resolvers
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 # Built for devs
 
@@ -116,6 +163,8 @@ Note:
 It's much easier to test, break things, start, stop the server
 
 ----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 # Built for devs
 
@@ -128,11 +177,15 @@ Build and deploy production-ready APIs within *hours*
 
 ----
 
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
 # Built for devs
 
 ## Serverless deployment
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 # Built for devs
 
@@ -148,6 +201,8 @@ Note:
 
 ---
 
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
 # Codegen
 
 ## From schema
@@ -161,6 +216,8 @@ type Owner @entity {
 ```
 
 ----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 # Codegen
 
@@ -190,11 +247,15 @@ Easier to define entities as a schema, code is built automatically
 
 ---
 
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
 # Typegen
 
 ## Type-safe wrappers for Substrate
 
 ----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 ## Runtime upgrades
 
@@ -208,6 +269,8 @@ Runtime upgrades break things...
 
 ----
 
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
 ## 👋Runtime upgrade bugs
 
 ```typescript=
@@ -216,30 +279,21 @@ export class BalancesTransferEvent {
     assert(this.ctx.event.name === 'balances.Transfer')
   }
 
-  get isV1020(): boolean {
-    return this.ctx._chain.getEventHash('balances.Transfer') === '72e6f0d399a72f77551d560f52df25d757e0643d0192b3bc837cbd91b6f36b27'
+  get isV49(): boolean {
+    return this.ctx._chain.getEventHash('balances.Transfer') === 'dfcae516f053c47e7cb49e0718f01587efcb64cea4e3baf4c6973a29891f7841'
   }
 
-  get asV1020(): [Uint8Array, Uint8Array, bigint, bigint] {
-    assert(this.isV1020)
+  get asV49(): [Uint8Array, Uint8Array, bigint] {
+    assert(this.isV49)
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 
-  get isV1050(): boolean {
-    return this.ctx._chain.getEventHash('balances.Transfer') === 'dad2bcdca357505fa3c7832085d0db53ce6f902bd9f5b52823ee8791d351872c'
+  get isV1201(): boolean {
+    return this.ctx._chain.getEventHash('balances.Transfer') === '23222c59f2992c12387568241620899d2d399ab9027595daca8255637f62ece3'
   }
 
-  get asV1050(): [Uint8Array, Uint8Array, bigint] {
-    assert(this.isV1050)
-    return this.ctx._chain.decodeEvent(this.ctx.event)
-  }
-
-  get isV9130(): boolean {
-    return this.ctx._chain.getEventHash('balances.Transfer') === '0ffdf35c495114c2d42a8bf6c241483fd5334ca0198662e14480ad040f1e3a66'
-  }
-
-  get asV9130(): {from: v9130.AccountId32, to: v9130.AccountId32, amount: bigint} {
-    assert(this.isV9130)
+  get asV1201(): {from: v1201.AccountId20, to: v1201.AccountId20, amount: bigint} {
+    assert(this.isV1201)
     return this.ctx._chain.decodeEvent(this.ctx.event)
   }
 }
@@ -253,13 +307,17 @@ Note:
 
 ---
 
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
 # EVM Typegen
 
-## ABI automated parsing
+## Type-safe interfaces from ABI deserialization
 
 ----
 
-## ABI automated parsing
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
+## Type-safe interfaces from ABI deserialization
 
 ### From JSON...
 
@@ -690,6 +748,8 @@ Note:
 
 ----
 
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
 ## ABI automated parsing
 
 ### ...to TypeScript
@@ -728,6 +788,8 @@ Note:
 
 ---
 
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
 ## Resources
 
 * [Subsquid Docs](https://docs.subsquid.io)
@@ -739,9 +801,13 @@ Note:
 
 ---
 
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
 # Let’s get coding…🦑
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 ## Goal: ERC721 tracker
 
@@ -755,6 +821,8 @@ Note:
 8. Launch processor and GraphQL server<!-- .element: class="fragment" -->
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 <!-- .slide: class="smol" -->
 <!-- .slide: class="left" -->
@@ -807,6 +875,8 @@ explore:
 
 ---
 
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
 <!-- .slide: class="smol" -->
 <!-- .slide: class="left" -->
 
@@ -826,13 +896,14 @@ type Token @entity {
   transfers: [Transfer!]! @derivedFrom(field: "token")
   contract: Contract
 }
-
+ 
 type Owner @entity {
   id: ID!
-  ownedTokens: [Token!]! @derivedFrom(field: "owner")
-  balance: BigInt
+  ownedTokens: [Token!] @derivedFrom(field: "owner")
+  balance: BigInt!
+  historicalBalances: [HistoricalBalance!] @derivedFrom(field: "account")
 }
-
+ 
 type Contract @entity {
   id: ID!
   name: String
@@ -840,7 +911,7 @@ type Contract @entity {
   totalSupply: BigInt
   mintedTokens: [Token!]! @derivedFrom(field: "contract")
 }
-
+ 
 type Transfer @entity {
   id: ID!
   token: Token!
@@ -850,9 +921,19 @@ type Transfer @entity {
   block: Int!
   transactionHash: String!
 }
+
+type HistoricalBalance @entity {
+  id: ID!
+  account: Owner!
+  balance: BigInt!
+  date: DateTime!
+}
+
 ```
 
 ----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 <!-- .slide: class="smol" -->
 <!-- .slide: class="left" -->
@@ -863,9 +944,11 @@ type Transfer @entity {
 ```bash
 npx sqd codegen  # or `make codegen`
 ```
-* New files will be created ![](https://i.imgur.com/1HpAaLE.png =x450)
+* New files will be created ![](https://i.imgur.com/16izs2Y.png =x450)
 
 ----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 <!-- .slide: class="smol" -->
 <!-- .slide: class="left" -->
@@ -878,6 +961,7 @@ npx sqd codegen  # or `make codegen`
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_} from "typeorm"
 import * as marshal from "./marshal"
 import {Token} from "./token.model"
+import {HistoricalBalance} from "./historicalBalance.model"
 
 @Entity_()
 export class Owner {
@@ -891,13 +975,56 @@ export class Owner {
   @OneToMany_(() => Token, e => e.owner)
   ownedTokens!: Token[]
 
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
-  balance!: bigint | undefined | null
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
+  balance!: bigint
+
+  @OneToMany_(() => HistoricalBalance, e => e.account)
+  historicalBalances!: HistoricalBalance[]
 }
 
 ```
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
+<!-- .slide: class="smol" -->
+<!-- .slide: class="left" -->
+
+# Typegen
+
+Explore the chain metadata
+
+```bash
+npx squid-substrate-metadata-explorer \
+		--chain wss://wss.api.moonriver.moonbeam.network \
+		--archive https://moonriver-beta.indexer.gc.subsquid.io/v4/graphql \
+		--out moonriverVersions.json
+```
+
+Change `typegen.json` config
+
+```json=
+{
+  "outDir": "src/types",
+  "chainVersions": "moonriverVersions.json",
+  "typesBundle": "moonriver",
+  "events": [
+    "balances.Transfer"
+  ],
+  "calls": []
+}
+```
+
+Generate interfaces
+
+```bash
+npx squid-substrate-typegen typegen.json
+```
+
+----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 <!-- .slide: class="smol" -->
 <!-- .slide: class="left" -->
@@ -917,6 +1044,8 @@ Note:
   https://github.com/PureStake/moonbeam-docs/blob/master/.snippets/code/subsquid/erc721.md
 
 ----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 ## TypeScript and linting config
 
@@ -944,6 +1073,8 @@ And add these configurations to the `.eslint` file:
 ```
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 <!-- .slide: class="smol" -->
 <!-- .slide: class="left" -->
@@ -992,29 +1123,38 @@ export async function getContractEntity({
 
 ---
 
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
 <!-- .slide: class="smol" -->
 <!-- .slide: class="left" -->
 
 # Processor logic
 
-Processor logic needs to be changed, as it is no longer handling Substrate Events, but EVM logs. Let's change the file like so:
+Processor logic needs to be updated, we maintain the handling of Substrate Events, but add EVM logs handling. Let's change the file like so:
 
 ```typescript=
 import {
+  EventHandlerContext,
   EvmLogHandlerContext,
+  Store,
   SubstrateEvmProcessor,
+  toHex
 } from "@subsquid/substrate-evm-processor";
 import { lookupArchive } from "@subsquid/archive-registry";
+import { getAddress } from "@ethersproject/address"
 import { CHAIN_NODE, contract, createContractEntity, getContractEntity } from "./contract";
 import { events } from "./abi/erc721";
-import { Owner, Token, Transfer } from "./model";
+import { Owner, Token, Transfer, HistoricalBalance,} from "./model";
+import { BalancesTransferEvent } from "./types/events";
 
 const processor = new SubstrateEvmProcessor("erc721");
 
 processor.setDataSource({
   chain: CHAIN_NODE,
-  archive: lookupArchive("moonbeam")[0].url,
+  archive: lookupArchive("moonriver")[0].url,
 });
+
+processor.setBatchSize(500);
 
 processor.addPreHook({ range: { from: 0, to: 0 } }, async (ctx) => {
   await ctx.store.save(createContractEntity());
@@ -1025,26 +1165,63 @@ processor.addEvmLogHandler(
   {
     filter: [events["Transfer(address,address,uint256)"].topic],
   },
-  processTransfer
+  processErcTransfer
 );
+
+processor.addEventHandler("balances.Transfer", processTransfer);
 
 processor.run();
 
-async function processTransfer(ctx: EvmLogHandlerContext): Promise<void> {
+async function processTransfer(ctx: EventHandlerContext): Promise<void> {
+  const transfer = getTransferEvent(ctx);
+  const tip = ctx.extrinsic?.tip || 0n;
+
+  const from = getAddress(toHex(transfer.from));
+  const to = getAddress(toHex(transfer.to));
+
+  const fromAcc = await getOrCreate(ctx.store, Owner, from);
+  fromAcc.balance = fromAcc.balance || 0n;
+  fromAcc.balance -= transfer.amount;
+  fromAcc.balance -= tip;
+  await ctx.store.save(fromAcc);
+
+  const toAcc = await getOrCreate(ctx.store, Owner, to);
+  toAcc.balance = toAcc.balance || 0n;
+  toAcc.balance += transfer.amount;
+  await ctx.store.save(toAcc);
+
+  await ctx.store.save(
+    new HistoricalBalance({
+      id: `${ctx.event.id}-to`,
+      account: fromAcc,
+      balance: fromAcc.balance,
+      date: new Date(ctx.block.timestamp),
+    })
+  );
+
+  await ctx.store.save(
+    new HistoricalBalance({
+      id: `${ctx.event.id}-from`,
+      account: toAcc,
+      balance: toAcc.balance,
+      date: new Date(ctx.block.timestamp),
+    })
+  );
+};
+
+async function processErcTransfer(ctx: EvmLogHandlerContext): Promise<void> {
   const transfer =
     events["Transfer(address,address,uint256)"].decode(ctx);
+    
+  console.log("Found ERC transfer", transfer.tokenId.toString());
 
-  let from = await ctx.store.get(Owner, transfer.from);
-  if (from == null) {
-    from = new Owner({ id: transfer.from, balance: 0n });
-    await ctx.store.save(from);
-  }
+  const from = await getOrCreate(ctx.store, Owner, transfer.from);
+  from.balance = from.balance || 0n;
+  await ctx.store.save(from);
 
-  let to = await ctx.store.get(Owner, transfer.to);
-  if (to == null) {
-    to = new Owner({ id: transfer.to, balance: 0n });
-    await ctx.store.save(to);
-  }
+  const to = await getOrCreate(ctx.store, Owner, transfer.to);
+  to.balance = to.balance || 0n;
+  await ctx.store.save(to);
 
   let token = await ctx.store.get(Token, transfer.tokenId.toString());
   if (token == null) {
@@ -1073,9 +1250,51 @@ async function processTransfer(ctx: EvmLogHandlerContext): Promise<void> {
   );
 }
 
+interface TransferEvent {
+  from: Uint8Array;
+  to: Uint8Array;
+  amount: bigint;
+}
+
+function getTransferEvent(ctx: EventHandlerContext): TransferEvent {
+  const event = new BalancesTransferEvent(ctx);
+  if (event.isV49) {
+    const [from, to, amount] = event.asV49;
+    return { from, to, amount };
+  }
+  if (event.isV1201) {
+    const {from, to, amount} = event.asV1201;
+    return { from, to, amount };
+  } 
+  throw new Error("Runtime version not found");
+}
+
+async function getOrCreate<T extends { id: string }>(
+  store: Store,
+  EntityConstructor: EntityConstructor<T>,
+  id: string
+): Promise<T> {
+  let entity = await store.get<T>(EntityConstructor, {
+    where: { id },
+  });
+
+  if (entity == null) {
+    entity = new EntityConstructor();
+    entity.id = id;
+  }
+
+  return entity;
+}
+
+type EntityConstructor<T> = {
+  new (...args: any[]): T;
+};
+
 ```
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 <!-- .slide: class="smol" -->
 <!-- .slide: class="left" -->
@@ -1094,6 +1313,8 @@ make up
 ```
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 <!-- .slide: class="smol" -->
 <!-- .slide: class="left" -->
@@ -1122,11 +1343,13 @@ sqd db create
 * Create and apply new migration
 
 ```bash=
-sqd db create-migration Initial # make migration
+sqd db create-migration Data # make migration
 sqd db migrate # make migrate
 ```
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 <!-- .slide: class="smol" -->
 <!-- .slide: class="left" -->
@@ -1151,15 +1374,19 @@ npx squid-graphql-server # make serve
 
 ---
 
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
+
 ## Good news everyone!
 
 ![](https://media.giphy.com/media/3zFcbgHoIXzykQc7vU/giphy.gif)
 
 This project is actually available as an EVM-template
 
-https://github.com/subsquid/squid-evm-template
+https://github.com/subsquid/moonbeam-workshop
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 ## Adapt and create
 
@@ -1173,6 +1400,8 @@ https://github.com/subsquid/squid-evm-template
 💣💣💣
 
 ---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/base_bg.png" -->
 
 # Thank you 🦑
 
