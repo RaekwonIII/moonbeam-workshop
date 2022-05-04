@@ -1,7 +1,7 @@
 {
   "outDir": "src/types",
-  "chainVersions": "kusamaVersions.json",
-  "typesBundle": "kusama",
+  "chainVersions": "moonriverVersions.json",
+  "typesBundle": "moonriver",
   "events": [
     "balances.Transfer"
   ],

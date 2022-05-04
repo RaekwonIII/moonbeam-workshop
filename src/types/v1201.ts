@@ -1,3 +1,3 @@
 import type {Result} from './support'
 
-export type AccountId32 = Uint8Array
+export type AccountId20 = Uint8Array

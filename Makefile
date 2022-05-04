@@ -22,20 +22,20 @@ codegen:
 	@npx sqd codegen
 
 
-typegen: kusamaVersions.json
+
+typegen: moonriverVersions.json
 	@npx squid-substrate-typegen typegen.json
 
 
-kusamaVersions.json:
+moonriverVersions.json:
 	@make explore
 
 
 explore:
 	@npx squid-substrate-metadata-explorer \
-		--chain wss://kusama-rpc.polkadot.io \
-		--archive https://kusama.indexer.gc.subsquid.io/v4/graphql \
-		--out kusamaVersions.json
-
+		--chain wss://wss.api.moonriver.moonbeam.network \
+		--archive https://moonriver-beta.indexer.gc.subsquid.io/v4/graphql \
+		--out moonriverVersions.json
 
 up:
 	@docker-compose up -d
