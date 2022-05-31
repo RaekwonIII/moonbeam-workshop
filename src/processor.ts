@@ -72,6 +72,7 @@ async function processTransfer(ctx: EventHandlerContext): Promise<void> {
       date: new Date(ctx.block.timestamp),
     })
   );
+  console.log("Substrate Transfer complete");
 };
 
 async function processErcTransfer(ctx: EvmLogHandlerContext): Promise<void> {
@@ -83,10 +84,12 @@ async function processErcTransfer(ctx: EvmLogHandlerContext): Promise<void> {
   const from = await getOrCreate(ctx.store, Owner, transfer.from);
   from.balance = from.balance || 0n;
   await ctx.store.save(from);
+  console.log("Saved Owner #1");
 
   const to = await getOrCreate(ctx.store, Owner, transfer.to);
   to.balance = to.balance || 0n;
   await ctx.store.save(to);
+  console.log("Saved Owner #2");
 
   let token = await ctx.store.get(Token, transfer.tokenId.toString());
   if (token == null) {
@@ -101,6 +104,7 @@ async function processErcTransfer(ctx: EvmLogHandlerContext): Promise<void> {
     token.owner = to;
     await ctx.store.save(token);
   }
+  console.log("Saved Token");
 
   await ctx.store.save(
     new Transfer({
@@ -113,6 +117,7 @@ async function processErcTransfer(ctx: EvmLogHandlerContext): Promise<void> {
       transactionHash: ctx.txHash,
     })
   );
+  console.log("ERC transfer complete");
 }
 
 interface TransferEvent {
