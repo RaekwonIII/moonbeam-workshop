@@ -50,6 +50,17 @@ https://hackmd.io/@RaekwonIII/moonbeam-workshop
 ---
 
 <!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/assets/base_bg.png" -->
+
+# Agenda
+
+* Subsquid intro<!-- .element: class="fragment" -->
+* Updates<!-- .element: class="fragment" -->
+* Coding<!-- .element: class="fragment" -->
+* Demo<!-- .element: class="fragment" -->
+
+---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/assets/base_bg.png" -->
   
 ## Web2 data solutions
 
@@ -212,7 +223,7 @@ Build and deploy production-ready APIs within *hours*
 
 ## Serverless deployment ☁️
 
----
+----
 
 <!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/assets/base_bg.png" -->
 
@@ -1622,6 +1633,62 @@ Note:
 * [Aquarium](https://app.subsquid.io/aquarium)
 * [Stackexchange](https://substrate.stackexchange.com/) (subsquid tag):
 * Community: [Telegram](https://t.me/HydraDevs) group, [Discord](https://discord.gg/dxR4wNgdjV) server 
+
+---
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/assets/base_bg.png" -->
+
+# Updates
+
+## FireSquid release 🔥🦑
+
+* New Archives<!-- .element: class="fragment" -->
+* Batching<!-- .element: class="fragment" -->
+* SPEEEEED<!-- .element: class="fragment" -->
+* EVM Transaction typegen<!-- .element: class="fragment" -->
+* Contract state calls<!-- .element: class="fragment" -->
+
+----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/assets/base_bg.png" -->
+
+# Updates 
+
+## Aquarium! 🐟🦑🐡
+
+https://app.subsquid.io/aquarium/
+
+----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/assets/base_bg.png" -->
+
+# Updates 
+
+## Subscriptions! 🙌
+
+```graphql
+subscription {
+    transfers(limit: 5, orderBy: timestamp_DESC) {
+        amount
+        blockNumber
+        from {
+          id
+        }
+        to {
+          id
+        }
+    }
+}
+    
+```
+
+----
+
+<!-- .slide: data-background="https://github.com/RaekwonIII/moonbeam-workshop/raw/main/assets/base_bg.png" -->
+
+# Updates 
+
+## Processor Cache 
 
 ---
 
