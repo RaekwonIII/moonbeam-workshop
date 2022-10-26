@@ -1,7 +1,6 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_} from "typeorm"
 import * as marshal from "./marshal"
 import {Token} from "./token.model"
-import {HistoricalBalance} from "./historicalBalance.model"
 
 @Entity_()
 export class Owner {
@@ -15,9 +14,6 @@ export class Owner {
   @OneToMany_(() => Token, e => e.owner)
   ownedTokens!: Token[]
 
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  balance!: bigint
-
-  @OneToMany_(() => HistoricalBalance, e => e.account)
-  historicalBalances!: HistoricalBalance[]
+  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: true})
+  balance!: bigint | undefined | null
 }

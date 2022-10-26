@@ -5,14 +5,13 @@ type Token @entity {
   transfers: [Transfer!]! @derivedFrom(field: "token")
   contract: Contract
 }
- 
+
 type Owner @entity {
   id: ID!
-  ownedTokens: [Token!] @derivedFrom(field: "owner")
-  balance: BigInt!
-  historicalBalances: [HistoricalBalance!] @derivedFrom(field: "account")
+  ownedTokens: [Token!]! @derivedFrom(field: "owner")
+  balance: BigInt
 }
- 
+
 type Contract @entity {
   id: ID!
   name: String
@@ -20,7 +19,7 @@ type Contract @entity {
   totalSupply: BigInt
   mintedTokens: [Token!]! @derivedFrom(field: "contract")
 }
- 
+
 type Transfer @entity {
   id: ID!
   token: Token!
@@ -29,11 +28,4 @@ type Transfer @entity {
   timestamp: BigInt!
   block: Int!
   transactionHash: String!
-}
-
-type HistoricalBalance @entity {
-  id: ID!
-  account: Owner!
-  balance: BigInt!
-  date: DateTime!
 }
