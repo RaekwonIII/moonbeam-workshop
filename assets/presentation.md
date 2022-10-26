@@ -1,7 +1,7 @@
 ---
-title: Native Ethereum indexing workshop
+title: Moonbeam EVM indexing
 tags: EVM, Subsquid, Indexing, Ethereum, Workshop
-description: Indexing Ethereum blockchain with Subsquid
+description: Indexing Moonbeam smart contracts with Subsquid
 slideOptions:
   center: false
   transition: fade
@@ -25,12 +25,12 @@ slideOptions:
 <!-- .slide: data-background="https://github.com/RaekwonIII/ethereum-workshop/raw/main/assets/cover_bg.png" -->
 
 <!-- ![](https://i.imgur.com/Z4Jt5vh.png) -->
-# Native EVM indexing
+# Moonbeam EVM indexing
 
-## Access Ethereum blockchain data with Subsquid
+## Access Moonbeam blockchain data with Subsquid
 
 Slides available here
-https://hackmd.io/@RaekwonIII/native-ethereum-workshop
+https://hackmd.io/@RaekwonIII/moonbeam-workshop
 
 ---
 
@@ -1633,7 +1633,7 @@ Note:
 
 <!-- .slide: data-background="https://github.com/RaekwonIII/ethereum-workshop/raw/main/assets/base_bg.png" -->
 
-## Goal: [Exosama](https://exosama.com/) tracker
+## Goal: [Gromlins](https://exosama.com/) tracker
 
 1. Setup<!-- .element: class="fragment" -->
 2. Review the schema<!-- .element: class="fragment" -->
@@ -1658,13 +1658,13 @@ Note:
 * GitHub [template](https://github.com/subsquid/squid-ethereum-template), *Use this template*, then
 
 ```bash
-git clone git@github.com:<account>/squid-ethereum-template.git
+git clone git@github.com:<account>/squid-evm-template.git
 ```
 
 * Install dependencies from project's root folder
 
 ```bash
-cd squid-ethereum-template && npm i
+cd squid-evm-template && npm i
 ``` 
 
 ---
@@ -1683,6 +1683,14 @@ Define entities we want to track in `schema.graphql` file in the project root fo
 * Contract and their minted tokens
 
 ```graphql=
+type Contract @entity {
+  id: ID!
+  name: String
+  symbol: String
+  totalSupply: BigInt
+  tokens: [Token!]! @derivedFrom(field: "contract")
+}
+
 type Token @entity {
   id: ID!
   owner: Owner
@@ -1690,34 +1698,20 @@ type Token @entity {
   transfers: [Transfer!]! @derivedFrom(field: "token")
   contract: Contract
 }
- 
+
 type Owner @entity {
   id: ID!
-  ownedTokens: [Token!] @derivedFrom(field: "owner")
-  balance: BigInt! @index
+  ownedTokens: [Token!]! @derivedFrom(field: "owner")
 }
- 
-type Contract @entity {
-  id: ID!
-  name: String! @index
-  symbol: String! @index
-  # contract URI updated once e.g. a day
-  contractURI: String
-  address: String
-  # timestamp when the contract URI was updated last
-  contractURIUpdated: BigInt @index
-  totalSupply: BigInt!
-  mintedTokens: [Token!]! @derivedFrom(field: "contract")
-}
- 
+
 type Transfer @entity {
   id: ID!
   token: Token!
   from: Owner
   to: Owner
-  timestamp: BigInt! @index
-  block: Int! @index
-  transactionHash: String! @index
+  timestamp: BigInt!
+  block: Int!
+  transactionHash: String!
 }
 
 ```
@@ -1749,8 +1743,7 @@ make codegen
 ### Let's take the `Owner` entity as an example
 
 ```typescript=
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_, Index as Index_} from "typeorm"
-import * as marshal from "./marshal"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_} from "typeorm"
 import {Token} from "./token.model"
 
 @Entity_()
@@ -1764,11 +1757,8 @@ export class Owner {
 
   @OneToMany_(() => Token, e => e.owner)
   ownedTokens!: Token[]
-
-  @Index_()
-  @Column_("numeric", {transformer: marshal.bigintTransformer, nullable: false})
-  balance!: bigint
 }
+
 
 ```
 
@@ -1781,8 +1771,8 @@ export class Owner {
 
 # EVM Typegen
 
-* Need Exosama smart contract's ABI to interpret its logs
-* Copy it from [here](https://raw.githubusercontent.com/subsquid/exosama-marketplace-squid/master/src/abi/ExosamaCollection.json?token=GHSAT0AAAAAABYGBV26BQ6KEQPNQCMB43F6Y2RFAJQ)
+* Need Gromlins smart contract's ABI to interpret its logs
+* Copy it from [here](https://raw.githubusercontent.com/RaekwonIII/moonbeam-workshop/master/src/abi/gromlins.json)
 * Create a `src/abi` folder to contain all ABIs
 * Paste it into a file named `exo.json` in `src/abi`
 * From project root folder, launch:
@@ -1798,248 +1788,168 @@ npx squid-evm-typegen --abi src/abi/exo.json --output src/abi/exo.ts
 <!-- .slide: class="smol" -->
 <!-- .slide: class="left" -->
 
-# Contract helper
-
-This is a very simplified version, that hard-codes some of the data.
-
-```typescript=
-import { Store } from "@subsquid/typeorm-store";
-import { Contract } from "./model";
-
-export const contractAddress = "0xac5c7493036de60e63eb81c5e9a440b42f47ebf5";
-
-let contractEntity: Contract | undefined;
-
-export async function getOrCreateContractEntity(store: Store): Promise<Contract> {
-  if (contractEntity == null) {
-    contractEntity = await store.get(Contract, contractAddress);
-    if (contractEntity == null) {
-      contractEntity = new Contract({
-        id: contractAddress,
-        name: "Exosama",
-        symbol: "EXO",
-        totalSupply: 10000n,
-      });
-      await store.insert(contractEntity);
-    }
-  }
-  return contractEntity;
-}
-
-```
-
----
-
-<!-- .slide: data-background="https://github.com/RaekwonIII/ethereum-workshop/raw/main/assets/base_bg.png" -->
-
-<!-- .slide: class="smol" -->
-<!-- .slide: class="left" -->
-
 # Processor logic
 
 Processor logic needs to be updated, we maintain the handling of Substrate Events, but add EVM logs handling. Let's change the file like so:
 
 ```typescript=
-import { Store, TypeormDatabase } from "@subsquid/typeorm-store";
-import { EvmBatchProcessor, BlockHandlerContext, LogHandlerContext } from "@subsquid/evm-processor";
-import { In } from "typeorm";
-import { BigNumber } from "ethers";
-import {
-  CHAIN_NODE,
-  contractAddress,
-  getOrCreateContractEntity,
-} from "./contract";
-import { Owner, Token, Transfer } from "./model";
-import * as exo from "./abi/exo";
+import {lookupArchive} from "@subsquid/archive-registry"
+import {BatchContext, BatchProcessorItem, EvmLogEvent, SubstrateBatchProcessor, SubstrateBlock} from "@subsquid/substrate-processor"
+import {Store, TypeormDatabase} from "@subsquid/typeorm-store"
+import {In} from "typeorm"
+import { ethers } from "ethers"
+import {Contract, Owner, Token, Transfer} from "./model"
+import * as gromlins from "./abi/gromlins"
 
-const database = new TypeormDatabase();
-const processor = new EvmBatchProcessor()
-  .setBlockRange({ from: 15584000 })
-  .setDataSource({
-    chain: process.env.ETHEREUM_MAINNET_WSS,
-    archive: 'https://eth-test.archive.subsquid.io',
-  })
-  .addLog(contractAddress, {
-    filter: [[exo.events["Transfer(address,address,uint256)"].topic]],
-    data: {
-      evmLog: {
-        topics: true,
-        data: true,
-      },
-      transaction: {
-        hash: true,
-      },
-    },
-  });
+const contractAddress = "0xF27A6C72398eb7E25543d19fda370b7083474735";
 
-processor.run(database, async (ctx) => {
-  const transfersData: TransferData[] = [];
+const processor = new SubstrateBatchProcessor()
+    .setBatchSize(500)
+    .setBlockRange({ from: 1777560 })
+    .setDataSource({
+        // Lookup archive by the network name in the Subsquid registry
+        archive: lookupArchive("moonbeam", {release: "FireSquid"}),
+        chain: "wss://moonbeam-rpc.dwellir.com"
+    })
+    .addEvmLog(contractAddress, {
+        filter: [gromlins.events["Transfer(address,address,uint256)"].topic],
+    });
 
-  for (const block of ctx.blocks) {
-    for (const item of block.items) {
-      if (item.kind === "evmLog") {
-        if (item.address === contractAddress) {
-          const transfer = handleTransfer({
-            ...ctx,
-            block: block.header,
-            ...item,
-          });
 
-          transfersData.push(transfer);
+type Item = BatchProcessorItem<typeof processor>
+type Ctx = BatchContext<Store, Item>
+
+
+processor.run(new TypeormDatabase(), async ctx => {
+
+    const transferData: TransferData[] = [];
+    for (const block of ctx.blocks) {
+        for (const item of block.items) {
+            if (item.name === "EVM.Log") {
+                const transfer = handleTransfer(ctx, block.header, item.event);
+                transferData.push(transfer);
+            }
         }
-      }
     }
-  }
 
-  await saveTransfers({
-    ...ctx,
-    block: ctx.blocks[ctx.blocks.length - 1].header,
-  }, transfersData);
-});
+    await saveTransfers(ctx, transferData);
+})
 
 type TransferData = {
-  id: string;
-  from: string;
-  to: string;
-  tokenId: bigint;
-  timestamp: bigint;
-  block: number;
-  transactionHash: string;
+    id: string;
+    from: string;
+    to: string;
+    token: ethers.BigNumber;
+    timestamp: bigint;
+    block: number;
+    transactionHash: string;
 };
 
 function handleTransfer(
-  ctx: LogHandlerContext<
-    Store,
-    { evmLog: { topics: true; data: true }; transaction: { hash: true } }
-  >
+    ctx: Ctx,
+    block: SubstrateBlock,
+    event: EvmLogEvent,
 ): TransferData {
-  const { evmLog, transaction, block } = ctx;
-  const addr = evmLog.address.toLowerCase()
 
-  const { from, to, tokenId } = exo.events[
-    "Transfer(address,address,uint256)"
-  ].decode(evmLog);
+    const evmLog = ((event.args.log || event.args));
+    const {from, to, tokenId} = gromlins.events["Transfer(address,address,uint256)"].decode(evmLog);
 
-  const transfer: TransferData = {
-    id: `${transaction.hash}-${addr}-${tokenId.toBigInt()}-${evmLog.index}`,
-    tokenId: tokenId.toBigInt(),
-    from,
-    to,
-    timestamp: BigInt(block.timestamp),
-    block: block.height,
-    transactionHash: transaction.hash,
-  };
+    const transfer = {
+        id: event.id,
+        token: tokenId,
+        from,
+        to,
+        timestamp: BigInt(block.timestamp),
+        block: block.height,
+        transactionHash: event.evmTxHash,
+    }
 
-  return transfer;
-}
+    return transfer;
+};
 
-async function saveTransfers(ctx: BlockHandlerContext<Store>, transfersData: TransferData[]) {
-  const tokensIds: Set<string> = new Set();
-  const ownersIds: Set<string> = new Set();
+async function saveTransfers(ctx: Ctx, transferData: TransferData[]) {
+    const tokenIds: Set<string> = new Set();
+    const ownerIds: Set<string> = new Set();
 
-  for (const transferData of transfersData) {
-    tokensIds.add(transferData.tokenId.toString());
-    ownersIds.add(transferData.from);
-    ownersIds.add(transferData.to);
-  }
+    for (const td of transferData) {
+        tokenIds.add(td.token.toString());
+        ownerIds.add(td.from);
+        ownerIds.add(td.to);
+    }
 
-  const transfers: Set<Transfer> = new Set();
-
-  const tokens: Map<string, Token> = new Map(
-    (await ctx.store.findBy(Token, { id: In([...tokensIds]) })).map((token) => [
-      token.id,
-      token,
-    ])
-  );
-
-  const owners: Map<string, Owner> = new Map(
-    (await ctx.store.findBy(Owner, { id: In([...ownersIds]) })).map((owner) => [
-      owner.id,
-      owner,
-    ])
-  );
-
-  for (const transferData of transfersData) {
-    const contract = new exo.Contract(
-      ctx,
-      { height: transferData.block },
-      contractAddress
+    const tokens: Map<string, Token> = new Map(
+        (await ctx.store.findBy(Token, { id: In([...tokenIds]) })).map((token) => [token.id, token])
     );
 
-    let from = owners.get(transferData.from);
-    if (from == null) {
-      from = new Owner({ id: transferData.from, balance: 0n });
-      owners.set(from.id, from);
+    const owners: Map<string, Owner> = new Map(
+        (await ctx.store.findBy(Owner, { id: In([...ownerIds]) })).map((owner) => [owner.id, owner])
+    );
+
+    let contractEntity = await ctx.store.get(Contract, contractAddress);
+    if (contractEntity == null) {
+        contractEntity = new Contract({
+            id: contractAddress,
+            name: "Gromlins",
+            symbol: "GROMLIN",
+            totalSupply: 3333n,
+        })
+        await ctx.store.insert(contractEntity);
     }
 
-    let to = owners.get(transferData.to);
-    if (to == null) {
-      to = new Owner({ id: transferData.to, balance: 0n });
-      owners.set(to.id, to);
+    const transfers: Set<Transfer> = new Set();
+    for (const td of transferData) {
+        const contract = new gromlins.Contract(
+            ctx,
+            { height: td.block },
+            contractAddress
+        );
+
+        let from = owners.get(td.from);
+        if (from == null) {
+            from = new Owner({ id: td.from});
+            owners.set(from.id, from);
+        }
+
+        let to = owners.get(td.to);
+        if (to == null) {
+            to = new Owner({id: td.to});
+            owners.set(to.id, to);
+        }
+
+        const tokenId = td.token.toString();
+
+        let token = tokens.get(tokenId);
+        if (token == null) {
+            token = new Token({
+                id: tokenId,
+                uri: await contract.tokenURI(td.token),
+                owner: to,
+                contract: contractEntity,
+            });
+            tokens.set(token.id, token);
+        }
+
+        const transfer  = new Transfer({
+            id: td.id,
+            block: td.block,
+            timestamp: td.timestamp,
+            transactionHash: td.transactionHash,
+            from,
+            to,
+            token
+        });
+
+        transfers.add(transfer);
     }
 
-    const tokenIdString = transferData.tokenId.toString();
-
-    let token = tokens.get(tokenIdString);
-
-    let tokenURI
-    try {
-      tokenURI = await contract.tokenURI(BigNumber.from(transferData.tokenId)) 
-    } catch (error) {
-      ctx.log.warn(`[API] Error during fetch tokenURI of ${tokenIdString}`);
-      if (error instanceof Error)
-        ctx.log.warn(`${error.message}`);
-    }
-    if (token == null) {
-      token = new Token({
-        id: tokenIdString,
-        uri: tokenURI,
-        contract: await getOrCreateContractEntity(ctx.store),
-      });
-      tokens.set(token.id, token);
-    }
-    token.owner = to;
-
-    const { id, block, transactionHash, timestamp } = transferData;
-
-    const transfer = new Transfer({
-      id,
-      block,
-      timestamp,
-      transactionHash,
-      from,
-      to,
-      token,
-    });
-
-    transfers.add(transfer);
-  }
-
-  await ctx.store.save([...owners.values()]);
-  await ctx.store.save([...tokens.values()]);
-  await ctx.store.save([...transfers]);
+    await ctx.store.save([...owners.values()]);
+    await ctx.store.save([...tokens.values()]);
+    await ctx.store.save([...transfers]);
 }
 
 ```
 
 Note:
-
-Remember to comment out `tokenUri` fetch, as an example
-
-----
-
-<!-- .slide: data-background="https://github.com/RaekwonIII/ethereum-workshop/raw/main/assets/base_bg.png" -->
-
-<!-- .slide: class="smol" -->
-<!-- .slide: class="left" -->
-
-# Ethereum Mainnet RPC endpoint
-
-We need set the `ETHEREUM_MAINNET_WSS` env variable value to a valid WSS endpoint for an Ethereum RPC node. You can use [EthereumNodes](https://ethereumnodes.com/) to find one.
-
-Note:
-
-`wss://mainnet.infura.io/ws/v3/2a1be98f319e4b059b85f853a140b315`
 
 Remember to comment out `tokenUri` fetch, as an example
 
