@@ -21,5 +21,5 @@ export class Contract {
   totalSupply!: bigint | undefined | null
 
   @OneToMany_(() => Token, e => e.contract)
-  mintedTokens!: Token[]
+  tokens!: Token[]
 }
