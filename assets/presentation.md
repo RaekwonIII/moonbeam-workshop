@@ -1688,7 +1688,15 @@ subscription {
 
 # Updates 
 
-## Processor Cache 
+## API Caching
+
+```typescript
+squid-graphql-server \
+    --dumb-cache in-memory \
+    --dumb-cache-ttl 5000 \
+    --dumb-cache-size 100 \
+    --dumb-cache-max-age 5000
+```
 
 ---
 
